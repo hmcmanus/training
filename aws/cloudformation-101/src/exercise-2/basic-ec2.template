@@ -1,0 +1,52 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates an instance in a VPC",
+  "Parameters": {
+    "KeyName": {
+      "Description": "The ssh key pair to access the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "SubnetId": {
+      "Description": "The subnet to place in the ec2 instance in",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "SecurityGroup": {
+      "Description": "The Security group to add to the instance",
+      "Type": "AWS::EC2::SecurityGroup::Id"
+    },
+    "VPC": {
+      "Description": "The VPC currently being used",
+      "Type": "AWS::EC2::VPC::Id"
+    }
+  },
+  "Resources": {
+    "cf101Ec2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": "ami-fd9cecc7",
+        "InstanceType": "t2.micro",
+        "KeyName": {"Ref": "KeyName"},
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {"Ref": "SecurityGroup"} ],
+          "SubnetId": { "Ref" : "SubnetId" }
+        } ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {"Ref": "AWS::StackName"},
+                  "-ec2"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

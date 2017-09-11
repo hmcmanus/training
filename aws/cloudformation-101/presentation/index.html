@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Cloudformation 101: An Introduction</title>
+
+		<meta name="description" content="A hands on experience of AWS cloudformation">
+		<meta name="author" content="Hugh McManus">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Cloudformation 101</h1>
+					<h3>An introduction</h3>
+					<p>
+						<small>Created by Hugh McManus / <a href="http://twitter.com/hugh_mc_manus">@hugh_mc_manus</a></small>
+					</p>
+				</section>
+                <section>
+                    <h2>Agenda</h2>
+                    <ul>
+                        <li>Check ssh access to jumpbox</li>
+                        <li>Introduction to Cloudformation</li>
+                        <li>Exercises</li>
+                        <li>Round up</li>
+                        <li>Retrospective</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>SSH access to jumpbox from your machine</h2>
+                    <pre><code>ssh &lt;username&gt;@&lt;x.x.x.x&gt;</code></pre>
+                    <p>Replacing &lt;username&gt; with your username</p>
+                    <p>And replacing &lt;x.x.x.x&gt; with the IP of your jumpbox</p>
+                </section>
+				<section>
+					<section>
+                        <h2>The why</h2>
+                        <blockquote cite="http://aws.amazon.com/cloudformation/">
+                            &ldquo;AWS CloudFormation gives developers and systems administrators an easy way to create and manage a collection of related AWS resources, provisioning and updating them in an orderly and predictable fashion.&rdquo;
+                        </blockquote>
+                    </section>
+                    <section>
+                        <h2>Advantages of this model of development</h2>
+                        <ul>
+                            <li>Source controlled infrastructure as code</li>
+                            <li>Changes can be tracked and controlled</li>
+                            <li>Reliable, repeatable change and rollback system</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>A word to the wise</h2>
+                        <ul>
+                            <li>Cloudformation is a consumer of the raw API's</li>
+                            <li>Not up to date as the API</li>
+                            <li>eg. API Gateway not currently support</li>
+                            <li>Updating an SNS topic properties</li>
+                        </ul>
+                    </section>
+				</section>
+
+                <section>
+                    <section>
+                        <h2>Exercise #1: Manual EC2</h2>
+                        <img data-src="img/exercise1-overview.png" alt="Overview 1">
+                    </section>
+                    <section>
+                        <h2>Manually through the console</h2>
+                        Login to the <a href="https://signin.aws.amazon.com/console/">AWS console</a>
+                    </section>
+                    <section>
+                        <h2>1.1: From EC2</h2>
+                        Use the EC2 management console</a>
+                        <img data-src="img/exercise1-1.png" alt="EC2">
+                    </section>
+                    <section>
+                        <h2>1.2: Launch Instance</h2>
+                        Click the launch instance
+                        <img data-src="img/exercise1-2.png" alt="Launch EC2">
+                    </section>
+                    <section>
+                        <h2>1.3: Choose your AMI</h2>
+                        Pick the Amazon Machine Image basis for your instance
+                        <img data-src="img/exercise1-3.png" alt="AMI">
+                    </section>
+                    <section>
+                        <h2>1.4: Choose the instance type</h2>
+                        Here's a list of <a href="https://aws.amazon.com/ec2/instance-types/">AWS instance types</a>
+                        <img data-src="img/exercise1-4.png" alt="Instance Type">
+                    </section>
+                    <section>
+                        <h2>1.5: Instance details</h2>
+                        <img data-src="img/exercise1-5.png" alt="Instance Details">
+                        <p>Network: cf101</p>
+                        <p>Subnet: cf101-public-subnet</p>
+                        <p>Auto-assign Public IP: Enable</p>
+                    </section>
+                    <section>
+                        <h2>1.6: Tag instance</h2>
+                        <img data-src="img/exercise1-6.png" alt="Instance Tag">
+                    </section>
+                    <section>
+                        <h2>1.7: Instance Security Group</h2>
+                        <img data-src="img/exercise1-7.png" alt="Instance Security Group">
+                        <p>cf101-EC2SecurityGroupAccessFromJumpbox-11L3UL9O6DC2E</p>
+                    </section>
+                    <section>
+                        <h2>1.8: Choose an existing key pair</h2>
+                        <img data-src="img/exercise1-8.png" alt="Existing key pair">
+                    </section>
+                    <section>
+                        <h2>1.9: Access from the jumpbox</h2>
+                        <pre><code>ssh -i ~/.ssh/dojo-key.pem ec2-user@&lt;instance-ip&gt;</code></pre>
+                    </section>
+                    <section>
+                        <h2>1.10: Terminate instance</h2>
+                        <img data-src="img/exercise1-10.png" alt="Terminate instance">
+                    </section>
+                </section>
+
+				<section>
+					<section>
+						<h2>The How</h2>
+						<p>JSON files to describe a set of resources</p>
+						<pre><code data-trim contenteditable>
+...
+"example1Ec2": {
+    "Type" : "AWS::EC2::Instance",
+    "Properties": {
+        "ImageId": "ami-6bf88b12",
+        "InstanceType": "t1.micro",
+        "SubnetId": "subnet-55e76884",
+        "KeyName": { "Ref": "KeyName" },
+        "Tags": [
+            { "Key": "Name", "Value": "MyTag" }
+        ]
+        }
+    }
+}
+...
+                        </code></pre>
+					</section>
+                    <section>
+                        <h2>What makes up a template</h2>
+                        <pre><code data-trim contenteditable>
+{
+    "AWSTemplateFormatVersion": "",
+    "Description": "",
+    "Metadata": { "Optional" },
+    "Parameters": { "Optional" },
+    "Mappings": { "Optional" },
+    "Conditions": { "Optional" },
+    "Resources": { "Required" },
+    "Outputs": { "Optional" }
+}
+                        </code></pre>
+                    </section>
+				</section>
+                <section>
+                    <section>
+                        <h2>Ex #2: EC2 from CloudFormation</h2>
+                        <img data-src="img/exercise2-overview.png" alt="Overview 2">
+                    </section>
+                    <section>
+                        <h2>2.1: Use the Cloud Formation console</h2>
+                        <img data-src="img/exercise2-1.png" alt="Cloud Formation">
+                    </section>
+                    <section>
+                        <h2>2.2: Create stack</h2>
+                        <img data-src="img/exercise2-2.png" alt="Stack Wizard">
+                    </section>
+                    <section>
+                        <h2>2.3: Select the template file</h2>
+                        <img data-src="img/exercise2-3.png" alt="Stack Template">
+                        <p>src/exercise-2/basic-ec2.template</p>
+                    </section>
+                    <section>
+                        <h2>2.4: Specify the stack name</h2>
+                        <img data-src="img/exercise2-4.png" alt="Stack Name">
+                    </section>
+                    <section>
+                        <h2>2.5: Specify the parmameters</h2>
+                        <img data-src="img/exercise2-5.png" alt="Stack Parameters">
+                    </section>
+                    <section>
+                        <h2>2.6: Cloudformation tags</h2>
+                        <img data-src="img/exercise2-6.png" alt="Stack Tags">
+                    </section>
+                    <section>
+                        <h2>2.7: Create</h2>
+                        <img data-src="img/exercise2-7.png" alt="Stack Create">
+                    </section>
+                    <section>
+                        <h2>2.8: Stack Status</h2>
+                        <img data-src="img/exercise2-8.png" alt="Stack Status">
+                    </section>
+                    <section>
+                        <h2>2.9: Stack Events</h2>
+                        <img data-src="img/exercise2-9.png" alt="Stack Events">
+                    </section>
+                    <section>
+                        <h2>2.10: View Instance</h2>
+                        <img data-src="img/exercise2-10.png" alt="Stack Create">
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Ex #3: SQS Queue Resource</h2>
+                        <img data-src="img/exercise3-overview.png" alt="Overview 3">
+                    </section>
+                    <section>
+                        <h2>3.1: Online reference</h2>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sqs-queues.html" target="_blank">SQS Cloudformation template definition</a>
+                        </p>
+                    </section>
+                    <section>
+                        <h2>3.2: Update existing stack</h2>
+                        <img data-src="img/exercise33-2.png" alt="Update Stack">
+                    </section>
+                    <section>
+                        <h2>3.3: Select the updated template file</h2>
+                        <img data-src="img/exercise33-3.png" alt="Update Stack">
+                    </section>
+                    <section>
+                        <h2>3.4: Update</h2>
+                        Keep the existing stack parameters then update
+                        <img data-src="img/exercise33-4.png" alt="New SQS resource">
+                    </section>
+                    <section>
+                        <h2>3.5: Check for UPDATE_COMPLETE</h2>
+                        <img data-src="img/exercise33-5.png" alt="Stack Update">
+                    </section>
+                    <section>
+                        <h2>3.6: New Resources</h2>
+                        <img data-src="img/exercise33-6.png" alt="Stack Resources">
+                    </section>
+                    <section>
+                        <h2>3.7: SQS in the console</h2>
+                        <img data-src="img/exercise33-7.png" alt="SQS AWS Console">
+                    </section>
+                    <section>
+                        <h2>3.8: View your new queue</h2>
+                        <img data-src="img/exercise33-8.png" alt="New SQS Queue">
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Ex #4: Removing Resources</h2>
+                        <img data-src="img/exercise4-overview.png" alt="Overview 5">
+                    </section>
+                    <section>
+                        <h2>4.1: Remove the resources from the JSON</h2>
+                    </section>
+                    <section>
+                        <h2>4.2: Update stack</h2>
+                        <img data-src="img/exercise4-2.png" alt="Update Stack">
+                    </section>
+                    <section>
+                        <h2>4.3: No more Queue</h2>
+                        <img data-src="img/exercise4-3.png" alt="Update complete">
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Ex #5: Firewall control</h2>
+                        <img data-src="img/exercise5-overview.png" alt="Overview 3">
+                    </section>
+                    <section>
+                        <h2>Ex #5: Two Parts</h2>
+                        <ol>
+                            <li>Create a new Security Group Resource</li>
+                            <li>Reference the new resource from the existing ec2 resource</li>
+                        </ol>
+                    </section>
+                    <section>
+                        <h2>5.1.0: Security Groups</h2>
+                        <blockquote cite="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html">
+                            &ldquo;Security groups — Act as a firewall for associated Amazon EC2 instances, controlling both inbound and outbound traffic at the instance level&rdquo;
+                        </blockquote>
+                    </section>
+                    <section>
+                        <h2>5.1.1: SG Online reference</h2>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html" target="_blank">Security Group Cloudformation template definition</a>
+                        </p>
+                        <p>Reference for creating a Security Group</p>
+                    </section>
+                    <section>
+                        <h2>5.1.2: Rule definition</h2>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-rule.html" target="_blank">Security Group Ingress Rules reference</a>
+                        </p>
+                        <ul>
+                            <li>Create security group ingress rule</li>
+                            <li>Set the IP Protocol to 'tcp'</li>
+                            <li>Set the to port to '80'</li>
+                            <li>Set the from port to '80'</li>
+                            <li>Set the Cidr range to '0.0.0.0/0'</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>5.1.3: Select updated template</h2>
+                        <img data-src="img/exercise5-1-3.png" alt="Update stack">
+                    </section>
+                    <section>
+                        <h2>5.1.4: Update Complete</h2>
+                        <img data-src="img/exercise5-1-4.png" alt="Update Complete">
+                    </section>
+                    <section>
+                        <h2>5.1.5: New Resource</h2>
+                        <img data-src="img/exercise5-1-5.png" alt="New SG">
+                    </section>
+                    <section>
+                        <h2>5.1.6: EC2 Console Security Groups</h2>
+                        <img data-src="img/exercise5-1-6.png" alt="New SG">
+                    </section>
+                    <section>
+                        <h2>5.2: Add SG to EC2 Instance</h2>
+                        <ul>
+                            <li>Edit the network interface definition for the ec2 instance</li>
+                            <li>Add and reference the new created security group</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>5.2.1: EC2 Online reference</h2>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-network-iface-embedded.html" target="_blank">EC2 Network Interface reference</a>
+                        </p>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-ref.html" target="_blank">Reference one resource from another</a>
+                        </p>
+                    </section>
+                    <section>
+                        <h2>5.2.2: Select updated template</h2>
+                        <img data-src="img/exercise5-2-2.png" alt="Update stack">
+                    </section>
+                    <section>
+                        <h2>5.2.3: Update Complete</h2>
+                        <img data-src="img/exercise5-2-3.png" alt="Update Complete">
+                    </section>
+                    <section>
+                        <h2>5.2.4: Check SG's on Instance</h2>
+                        <img data-src="img/exercise5-2-4.png" alt="Update Complete">
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Ex #6: User data</h2>
+                        <img data-src="img/exercise6-overview.png" alt="Overview 6">
+                    </section>
+                    <section>
+                        <h2>6.1: User data</h2>
+                        &ldquo;AWS EC2 instance user data allows you to execute commands when an instance is launched&rdquo;
+                    </section>
+                    <section>
+                        <h2>Exercise details</h2>
+                        <ol>
+                            <li>Install httpd on the instance</li>
+                            <li>Echo some text to /var/www/html/index.html</li>
+                            <li>Start the httpd service</li>
+                        </ol>
+                    </section>
+                    <section>
+                        <h2>6.2: Online reference</h2>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html" target="_blank">Instance Bootstrap Scripts</a>
+                        </p>
+                        <p>
+                            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html#cfn-ec2-instance-userdata" target="_blank">EC2 User Data</a>
+                        </p>
+                    </section>
+                    <section>
+                        <h2>6.3: Select updated template</h2>
+                        <img data-src="img/exercise6-3.png" alt="Update stack">
+                    </section>
+                    <section>
+                        <h2>6.4: Update Complete</h2>
+                        <img data-src="img/exercise6-4.png" alt="Update Complete">
+                    </section>
+                    <section>
+                        <h2>6.5: Find the instance public IP</h2>
+                        <img data-src="img/exercise6-5.png" alt="Public IP">
+                    </section>
+                    <section>
+                        <h2>6.6: Visit public IP on your browser</h2>
+                        You should see the contents that you have echoed to the file
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Alternatives</h2>
+                    <section>
+                        <h2>Teraform</h2>
+                        <blockquote cite="https://www.terraform.io/intro/index.html">
+                            &ldquo;Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as custom in-house solutions&rdquo;
+                        </blockquote>
+                    </section>
+                    <section>
+                        <h2>Programmatic templates</h2>
+                        <h3>Python</h3>
+                        <blockquote cite="https://github.com/cloudtools/troposphere">
+                            &ldquo;troposphere - library to create AWS CloudFormation descriptions&rdquo;
+                        </blockquote>
+                    </section>
+                    <section>
+                        <h2>Asguard</h2>
+                        <blockquote cite="https://github.com/Netflix/asgard">
+                            &ldquo;Asgard is a web-based tool for managing cloud-based applications and infrastructure.&rdquo;
+                        </blockquote>
+                    </section>
+                    <section>
+                        <h2>Commercial products</h2>
+                        <blockquote cite="http://www.rightscale.com/home-v1?utm_expid=99127306-75.PeFywD9NQhWW9IN-Cu4IfA.1&utm_referrer=https%3A%2F%2Fwww.google.com.au%2F">
+                            &ldquo;RightScale&rdquo;
+                        </blockquote>
+                        <blockquote cite="http://www.csc.com/cloud/offerings/53410/104965-csc_agility_platform_cloud_management">
+                            &ldquo;ServiceMesh&rdquo;
+                        </blockquote>
+                        <blockquote>
+                            &ldquo;etc...&rdquo;
+                        </blockquote>
+                    </section>
+                </section>
+                <section>
+                    <h2>Retrospective</h2>
+                </section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

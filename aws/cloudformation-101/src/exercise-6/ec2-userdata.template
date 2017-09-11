@@ -1,0 +1,83 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates an instance in a VPC",
+  "Parameters": {
+    "KeyName": {
+      "Description": "The ssh key pair to access the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "SubnetId": {
+      "Description": "The subnet to place in the ec2 instance in",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "SecurityGroup": {
+      "Description": "The Security group to add to the instance",
+      "Type": "AWS::EC2::SecurityGroup::Id"
+    },
+    "VPC": {
+      "Description": "The VPC currently being used",
+      "Type": "AWS::EC2::VPC::Id"
+    }
+  },
+  "Resources": {
+    "cf101Ec2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": "ami-fd9cecc7",
+        "InstanceType": "t2.micro",
+        "KeyName": {"Ref": "KeyName"},
+        "NetworkInterfaces": [ {
+          "AssociatePublicIpAddress": "true",
+          "DeviceIndex": "0",
+          "GroupSet": [ {"Ref": "SecurityGroup"}, {"Ref": "cf101WebSg"} ],
+          "SubnetId": { "Ref" : "SubnetId" }
+        } ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {"Ref": "AWS::StackName"},
+                  "-ec2"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum install -y httpd\n",
+                "/bin/echo 'The stack name is: ",
+                {"Ref": "AWS::StackName"},
+                "' > /var/www/html/index.html\n",
+                "service httpd start\n",
+                "chkconfig httpd on\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "cf101WebSg": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {"Ref": "VPC"},
+        "GroupDescription": "Enable http traffic",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    }
+  }
+}
